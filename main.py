@@ -3,6 +3,8 @@ import cv2
 import time
 from mtcnn.mtcnn import MTCNN
 
+
+
 def detectFace_from_opencv(cap):
     # init detect Face Model
     face_cascade = cv2.CascadeClassifier('D:\python_env/face_env/Lib/site-packages/cv2/data/haarcascade_frontalface_default.xml')
@@ -53,7 +55,7 @@ def detectFace_form_mtcnn(cap):
     # model = MTCNN(weights_file='filename.npy')
     detector = MTCNN()
 
-    fontScale=0.5
+    fontScale=2.5
     fps_idx=0
     # Start time
     start_time = time.time()
@@ -68,7 +70,7 @@ def detectFace_form_mtcnn(cap):
         for result in faces:
             # get coordinates
             (x, y, w, h) = result['box']
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 255), 2)
             wh_text = '({0},{1}), score={2:.2f}'.format(w,h,result['confidence'])
             cv2.putText(frame, wh_text, (x+w, y), cv2.FONT_HERSHEY_COMPLEX_SMALL,  fontScale, (0, 255, 255), 1, cv2.LINE_AA)
 
@@ -94,7 +96,9 @@ def open_camera():
     
     # 選擇第二隻攝影機
     cap = cv2.VideoCapture(1)
- 
+    # 設定影像的尺寸大小
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1024)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 768)
     # 兩種偵測人臉的方式
     # detectFace_from_opencv(cap)
     detectFace_form_mtcnn(cap)

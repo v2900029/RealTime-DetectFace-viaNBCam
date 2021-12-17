@@ -2,6 +2,11 @@ import numpy as np
 import cv2 
 import time
 from utils.detect_face import FaceDector
+import logging
+
+logging.basicConfig(level=logging.INFO, filename='logs/log.txt', filemode='w',
+	                    format='[%(asctime)s %(levelname)-8s] %(message)s',
+	                    datefmt='%Y%m%d %H:%M:%S',)
 
 
 def open_camera(cam_id=0, cap_size=(1024,768), backend='mtcnn'):
@@ -24,8 +29,7 @@ def open_camera(cam_id=0, cap_size=(1024,768), backend='mtcnn'):
         ret, frame = cap.read()
         if ret:
             faces = face_detector.detecFace(frame)
-            # faces = face_detector.detectFace_form_mtcnn(frame)
-            # face_detector.save_faces(self, frame, faces, save_name='output', save_path='./', verbose=1)
+            face_detector.save_faces(frame, faces, save_name='output-{:d}-'.format(fps_idx), save_path='./outputs/', verbose=1)
             frame = face_detector.draw_faces(frame, faces, fontScale=0.5, lineColor=(0,255,255))
 
         # Calculate frames per second

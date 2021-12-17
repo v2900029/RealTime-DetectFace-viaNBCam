@@ -1,7 +1,7 @@
 import numpy as np
 import cv2 
 from mtcnn.mtcnn import MTCNN
-
+import logging
 
 class FaceDector(object):
     def __init__(self, backend, opencv_xml_path=None, score_thr=0.90):
@@ -32,17 +32,17 @@ class FaceDector(object):
             faces = None
         return faces
 
-    def _update_log(self, face_index, detection, verbose=0):
+    def _update_log(self, face_index, detection, filename, verbose=0):
         x, y, w, h = detection["box"]
-        if self.backend =='mtcnn' and verbose == 1:
-            print("--------------------------------------------")
-            print("Face {}:".format(face_index))
-            print("\tbbox: (x, y, w, h) = ({0}, {1}, {2}, {3})".format(x, y, w, h))
+        if self.backend =='opencv' and verbose == 1:
+            logging.info("--------------------------------------------")
+            logging.info("Face {}{}:".format(filename, face_index))
+            logging.info("\tbbox: (x, y, w, h) = ({0}, {1}, {2}, {3})".format(x, y, w, h))
         elif self.backend =='mtcnn' and verbose == 1:
-            print("--------------------------------------------")
-            print("Face {}:".format(face_index))
-            print("\tbbox: (x, y, w, h) = ({0}, {1}, {2}, {3})".format(x, y, w, h))
-            print("\tconfidence: {:.3f}".format(detection["confidence"]))     
+            logging.info("--------------------------------------------")
+            logging.info("Face {}{}:".format(filename, face_index))
+            logging.info("\tbbox: (x, y, w, h) = ({0}, {1}, {2}, {3})".format(x, y, w, h))
+            logging.info("\tconfidence: {:.3f}".format(detection["confidence"]))     
 
     def detecFace(self, frame, scale_factor=1.2, min_neighbors=5, min_size=(50,50)):
         if self.backend == 'opencv':
@@ -59,21 +59,6 @@ class FaceDector(object):
         
         return faces                
 
-    # def detectFace_from_opencv(self, frame, scale_factor=1.2, min_neighbors=5, min_size=(50,50)):
-    #     input_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # RGB to gray image
-    #     detections = self.face_dector.detectMultiScale(input_img,
-    #                                                 scaleFactor = scale_factor,
-    #                                                 minNeighbors = min_neighbors,
-    #                                                 minSize = min_size,
-    #                                                 flags = cv2.CASCADE_SCALE_IMAGE)
-    #     faces = self.__encode_detection(detections)
-    #     return faces
-    
-    # def detectFace_form_mtcnn(self, frame):
-    #     detections = self.face_dector.detect_faces(frame)
-    #     faces = self.__encode_detection(detections)
-    #     return faces
-
     def save_faces(self, frame, faces, save_name='output', save_path='./', verbose=1):
         if self.backend == 'opencv':
             face_index=0
@@ -82,7 +67,7 @@ class FaceDector(object):
                 x, y, w, h = detection["box"]
                 detected_face = frame[int(y):int(y+h), int(x):int(x+w)]
                 cv2.imwrite('{}{}{:3d}.jpg'.format(save_path, save_name, face_index), detected_face)
-                self._update_log(face_index=face_index, detection=detection, verbose=1)
+                self._update_log(face_index=face_index, detection=detection, filename=save_name, verbose=verbose)
 
         elif self.backend == 'mtcnn':
             for detection in faces:
@@ -91,7 +76,7 @@ class FaceDector(object):
                     x, y, w, h = detection["box"]
                     detected_face = frame[int(y):int(y+h), int(x):int(x+w)]
                     cv2.imwrite('{}{}{:3d}.jpg'.format(save_path, save_name, face_index), detected_face)
-                    self._update_log(face_index=face_index, detection=detection, verbose=1)
+                    self._update_log(face_index=face_index, detection=detection, filename=save_name, verbose=verbose)
 
     def draw_faces(self, frame, faces, fontScale=0.5, lineColor=(0,255,255)):
         # Draw a rectangle around the faces

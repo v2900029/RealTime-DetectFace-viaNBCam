@@ -15,7 +15,7 @@ def open_camera(cam_id=0, cap_size=(1024,768), backend='mtcnn'):
     if backend =='opencv':
         face_detector = FaceDector(backend=backend, opencv_xml_path='D:\python_env/face_env/Lib/site-packages/cv2/data/haarcascade_frontalface_default.xml')
     elif backend == 'mtcnn':
-        face_detector = FaceDector(backend=backend, score_thr=0.90)    
+        face_detector = FaceDector(backend=backend, score_thr=0.90)
 
     start_time = time.time()
     while(True):

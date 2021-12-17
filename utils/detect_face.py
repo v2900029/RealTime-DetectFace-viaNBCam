@@ -44,20 +44,35 @@ class FaceDector(object):
             print("\tbbox: (x, y, w, h) = ({0}, {1}, {2}, {3})".format(x, y, w, h))
             print("\tconfidence: {:.3f}".format(detection["confidence"]))     
 
-    def detectFace_from_opencv(self, frame, scale_factor=1.2, min_neighbors=5, min_size=(50,50)):
-        input_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # RGB to gray image
-        detections = self.face_dector.detectMultiScale(input_img,
-                                                    scaleFactor = scale_factor,
-                                                    minNeighbors = min_neighbors,
-                                                    minSize = min_size,
-                                                    flags = cv2.CASCADE_SCALE_IMAGE)
-        faces = self.__encode_detection(detections)
-        return faces
+    def detecFace(self, frame, scale_factor=1.2, min_neighbors=5, min_size=(50,50)):
+        if self.backend == 'opencv':
+            input_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # RGB to gray image
+            detections = self.face_dector.detectMultiScale(input_img,
+                                                        scaleFactor = scale_factor,
+                                                        minNeighbors = min_neighbors,
+                                                        minSize = min_size,
+                                                        flags = cv2.CASCADE_SCALE_IMAGE)
+            faces = self.__encode_detection(detections)
+        elif self.backend == 'mtcnn':
+            detections = self.face_dector.detect_faces(frame)
+            faces = self.__encode_detection(detections)
+        
+        return faces                
+
+    # def detectFace_from_opencv(self, frame, scale_factor=1.2, min_neighbors=5, min_size=(50,50)):
+    #     input_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # RGB to gray image
+    #     detections = self.face_dector.detectMultiScale(input_img,
+    #                                                 scaleFactor = scale_factor,
+    #                                                 minNeighbors = min_neighbors,
+    #                                                 minSize = min_size,
+    #                                                 flags = cv2.CASCADE_SCALE_IMAGE)
+    #     faces = self.__encode_detection(detections)
+    #     return faces
     
-    def detectFace_form_mtcnn(self, frame):
-        detections = self.face_dector.detect_faces(frame)
-        faces = self.__encode_detection(detections)
-        return faces
+    # def detectFace_form_mtcnn(self, frame):
+    #     detections = self.face_dector.detect_faces(frame)
+    #     faces = self.__encode_detection(detections)
+    #     return faces
 
     def save_faces(self, frame, faces, save_name='output', save_path='./', verbose=1):
         if self.backend == 'opencv':

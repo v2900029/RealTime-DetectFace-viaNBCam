@@ -1,108 +1,44 @@
 import numpy as np
 import cv2 
 import time
-from mtcnn.mtcnn import MTCNN
+from utils.detect_face import FaceDector
 
 
-
-def detectFace_from_opencv(cap):
-    # init detect Face Model
-    face_cascade = cv2.CascadeClassifier('D:\python_env/face_env/Lib/site-packages/cv2/data/haarcascade_frontalface_default.xml')
-    
-    fontScale=0.5
-    fps_idx=0
-    # Start time
-    start_time = time.time()
-    while(True):
-        fps_idx+=1
-        # 從攝影機擷取一張影像
-        ret, frame = cap.read()
-        gray_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        faces = face_cascade.detectMultiScale(
-            gray_img,
-            scaleFactor=1.2,
-            minNeighbors=5,
-            minSize=(50, 50),
-            flags=cv2.CASCADE_SCALE_IMAGE
-        )
-
-        # Draw a rectangle around the faces
-        for (x, y, w, h) in faces:
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-            wh_text = '({0},{1})'.format(w,h)
-            cv2.putText(frame, wh_text, (x+w, y), cv2.FONT_HERSHEY_COMPLEX_SMALL,  fontScale, (0, 255, 255), 1, cv2.LINE_AA)
-
-        # Calculate frames per second
-        fps  = np.int(fps_idx / (time.time() - start_time))
-        fps_text = 'FPS: {0}'.format(fps)
-        cv2.putText(frame, fps_text, (10, 20), cv2.FONT_HERSHEY_COMPLEX_SMALL,  fontScale, (0, 255, 255), 1, cv2.LINE_AA)
-
-        # 顯示圖片
-        cv2.imshow('frame', frame)
-
-        if fps_idx>=1024:
-            start_time = time.time()
-            fps_idx=0
-
-        # 若按下 q 鍵則離開迴圈
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-
-def detectFace_form_mtcnn(cap):
-    # init detect Face Model
-    # model = MTCNN(weights_file='filename.npy')
-    detector = MTCNN()
-
-    fontScale=2.5
-    fps_idx=0
-    # Start time
-    start_time = time.time()
-    while(True):
-        fps_idx+=1
-        # 從攝影機擷取一張影像
-        ret, frame = cap.read()
-
-        faces = detector.detect_faces(frame)
-
-        # Draw a rectangle around the faces
-        for result in faces:
-            # get coordinates
-            (x, y, w, h) = result['box']
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 255), 2)
-            wh_text = '({0},{1}), score={2:.2f}'.format(w,h,result['confidence'])
-            cv2.putText(frame, wh_text, (x+w, y), cv2.FONT_HERSHEY_COMPLEX_SMALL,  fontScale, (0, 255, 255), 1, cv2.LINE_AA)
-
-        # Calculate frames per second
-        fps  = np.int(fps_idx / (time.time() - start_time))
-        fps_text = 'FPS: {0}'.format(fps)
-        cv2.putText(frame, fps_text, (10, 20), cv2.FONT_HERSHEY_COMPLEX_SMALL,  fontScale, (0, 255, 255), 1, cv2.LINE_AA)
-
-        # 顯示圖片
-        cv2.imshow('frame', frame)
-
-        if fps_idx>=1024:
-            start_time = time.time()
-            fps_idx=0
-
-        # 若按下 q 鍵則離開迴圈
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-def open_camera():
-    # # init detect Face Model
-    # face_cascade = cv2.CascadeClassifier('D:\python_env/face_env/Lib/site-packages/cv2/data/haarcascade_frontalface_default.xml')
-    
+def open_camera(cam_id=0, cap_size=(1024,768)):
     # 選擇第二隻攝影機
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(cam_id)
     # 設定影像的尺寸大小
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1024)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 768)
-    # 兩種偵測人臉的方式
-    # detectFace_from_opencv(cap)
-    detectFace_form_mtcnn(cap)
- 
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, cap_size[0])
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cap_size[1])
+
+    fps_idx=0
+    face_detector = FaceDector(backend='mtcnn', score_thr=0.90)
+    # face_detector = FaceDector(backend='opencv', opencv_xml_path='D:\python_env/face_env/Lib/site-packages/cv2/data/haarcascade_frontalface_default.xml')
+
+    start_time = time.time()
+    while(True):
+        fps_idx+=1
+        # 從攝影機擷取一張影像
+        ret, frame = cap.read()
+        if ret:
+            faces = face_detector.detectFace_form_mtcnn(frame)
+            # face_detector.save_faces(self, frame, faces, save_name='output', save_path='./', verbose=1)
+            frame = face_detector.draw_faces(frame, faces, fontScale=0.5, lineColor=(0,255,255))
+
+        # Calculate frames per second
+        fps  = np.int(fps_idx / (time.time() - start_time))
+        fps_text = 'FPS: {0}'.format(fps)
+        cv2.putText(frame, fps_text, (10, 20), cv2.FONT_HERSHEY_COMPLEX_SMALL,  0.5, (0, 255, 255), 1, cv2.LINE_AA)
+        cv2.imshow('frame', frame)
+
+        if fps_idx>=1024:
+            start_time = time.time()
+            fps_idx=0
+
+        # 若按下 q 鍵則離開迴圈
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break   
+
     # 釋放攝影機
     cap.release()
     # 關閉所有 OpenCV 視窗
@@ -110,4 +46,4 @@ def open_camera():
 
 
 if __name__ == '__main__':
-    open_camera()
+    open_camera(cam_id=0, cap_size=(1024,768))

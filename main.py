@@ -49,6 +49,9 @@ def open_camera(cam_id=0, cap_size=(1280,720), backend='mtcnn'):
 
 
 if __name__ == '__main__':
-
-    open_camera(cam_id=0, cap_size=(1280,720), backend='mtcnn')
-    # open_camera(cam_id=0, cap_size=(1280,720), backend='opencv')
+    ## Using NBcam
+    open_camera(cam_id=0, cap_size=(1280,720), backend='mtcnn') # MTCNN
+    open_camera(cam_id=0, cap_size=(1280,720), backend='opencv') # OpenCV
+    ## Using .mp4 video 
+    open_camera(cam_id='data/2021102716333349.mp4', cap_size=(1280,720), backend='mtcnn') # MTCNN
+    open_camera(cam_id='data/2021102716333349.mp4', cap_size=(1280,720), backend='mtcnn') # OpenCV

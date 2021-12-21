@@ -1,5 +1,6 @@
 import numpy as np
 import cv2 
+from datetime import datetime
 from mtcnn.mtcnn import MTCNN
 import logging
 
@@ -9,6 +10,9 @@ class FaceDector(object):
         self.opencv_xml_path = opencv_xml_path
         self.face_dector = self.__prepare_detector()
         self.score_thr = score_thr
+        self.start_time = datetime.now()
+        self.fps_idx = 0
+        self.fps = 0
         # self.support_backends = ['opencv', 'mtcnn']
 
     def __prepare_detector(self):
@@ -45,6 +49,7 @@ class FaceDector(object):
             logging.info("\tconfidence: {:.3f}".format(detection["confidence"]))     
 
     def detecFace(self, frame, scale_factor=1.2, min_neighbors=5, min_size=(50,50)):
+        self.fps_idx+=1
         if self.backend == 'opencv':
             input_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # RGB to gray image
             detections = self.face_dector.detectMultiScale(input_img,
@@ -60,13 +65,13 @@ class FaceDector(object):
         return faces                
 
     def save_faces(self, frame, faces, save_name='output', save_path='./', verbose=1):
+        face_index=0
         if self.backend == 'opencv':
-            face_index=0
             for detection in faces:
                 face_index += 1
                 x, y, w, h = detection["box"]
                 detected_face = frame[int(y):int(y+h), int(x):int(x+w)]
-                cv2.imwrite('{}{}{:3d}.jpg'.format(save_path, save_name, face_index), detected_face)
+                cv2.imwrite('{}{}-{:3d}.jpg'.format(save_path, save_name, face_index), detected_face)
                 self._update_log(face_index=face_index, detection=detection, filename=save_name, verbose=verbose)
 
         elif self.backend == 'mtcnn':
@@ -75,7 +80,7 @@ class FaceDector(object):
                     face_index += 1
                     x, y, w, h = detection["box"]
                     detected_face = frame[int(y):int(y+h), int(x):int(x+w)]
-                    cv2.imwrite('{}{}{:3d}.jpg'.format(save_path, save_name, face_index), detected_face)
+                    cv2.imwrite('{}{}-{:3d}.jpg'.format(save_path, save_name, face_index), detected_face)
                     self._update_log(face_index=face_index, detection=detection, filename=save_name, verbose=verbose)
 
     def draw_faces(self, frame, faces, fontScale=0.5, lineColor=(0,255,255)):
@@ -89,6 +94,16 @@ class FaceDector(object):
             else:
                 wh_text = 'Face: ({0},{1}), score={2}'.format(w,h,detections['confidence'])
             cv2.putText(frame, wh_text, (x+w, y), cv2.FONT_HERSHEY_COMPLEX_SMALL,  fontScale, lineColor, 1, cv2.LINE_AA)
-            # cv2.imshow('frame', frame)
         return frame
+    
+    def update_fps(self):
+        # Calculate frames per second 
+        self.fps  = np.int(self.fps_idx / (datetime.now()-self.start_time).total_seconds() )
 
+    def show_image(self, frame, with_fps=True, fontScale=0.5, lineColor=(0,255,255)):
+        if with_fps:
+            fps_text = 'FPS: {0}'.format(self.fps)
+            cv2.putText(frame, fps_text, (10, 20), cv2.FONT_HERSHEY_COMPLEX_SMALL,  fontScale, lineColor, 1, cv2.LINE_AA)
+            cv2.imshow('frame', frame)
+        else:
+            cv2.imshow('frame', frame)

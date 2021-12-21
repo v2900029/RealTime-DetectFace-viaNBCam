@@ -71,7 +71,7 @@ class FaceDector(object):
                 face_index += 1
                 x, y, w, h = detection["box"]
                 detected_face = frame[int(y):int(y+h), int(x):int(x+w)]
-                cv2.imwrite('{}{}-{:3d}.jpg'.format(save_path, save_name, face_index), detected_face)
+                cv2.imwrite('{}{}-{:d}.jpg'.format(save_path, save_name, face_index), detected_face)
                 self._update_log(face_index=face_index, detection=detection, filename=save_name, verbose=verbose)
 
         elif self.backend == 'mtcnn':

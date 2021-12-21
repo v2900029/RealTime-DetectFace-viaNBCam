@@ -15,14 +15,21 @@ Note that tensorflow-gpu version can be used instead if a GPU device is availabl
 
 The following example illustrates the ease of use of this package:
 
+1. Import packges
+
     import cv2 
     from datetime import datetime
     from utils.detect_face import FaceDector
-    ## Using NBcam
-    open_camera(cam_id=0, cap_size=(1280,720), backend='mtcnn')
-    open_camera(cam_id=0, cap_size=(1280,720), backend='opencv')
-    ## Using .mp4 video 
-    open_camera(cam_id='data/2021102716333349.mp4', cap_size=(1280,720), backend='mtcnn')
+
+2. Using Notebook Camera
+
+    open_camera(cam_id=0, cap_size=(1280,720), backend='mtcnn') # MTCNN
+    open_camera(cam_id=0, cap_size=(1280,720), backend='opencv') # OpenCV
+    
+3. Using .mp4 video   
+
+    open_camera(cam_id='data/2021102716333349.mp4', cap_size=(1280,720), backend='mtcnn') # MTCNN
+    open_camera(cam_id='data/2021102716333349.mp4', cap_size=(1280,720), backend='mtcnn') # OpenCV
 
 
 ## Reference

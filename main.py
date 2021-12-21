@@ -4,7 +4,7 @@ from datetime import datetime
 from utils.detect_face import FaceDector
 import logging
 
-logging.basicConfig(level=logging.INFO, filename='logs/log.txt', filemode='w',
+logging.basicConfig(level=logging.INFO, filename='logs/{}.txt'.format(datetime.now().strftime('%Y%m%d')), filemode='w',
 	                    format='[%(asctime)s %(levelname)-8s] %(message)s',
 	                    datefmt='%Y%m%d %H:%M:%S',)
 
@@ -28,7 +28,6 @@ def open_camera(cam_id=0, cap_size=(1280,720), backend='mtcnn'):
         if ret:
             # timestamps.append(cap.get(cv2.CAP_PROP_POS_MSEC))
             faces = face_detector.detecFace(frame)
-            print('{0}-{1}-'.format(camera_name, datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]))
             face_detector.save_faces(frame, faces, save_name='{0}-{1}'.format(camera_name, datetime.now().strftime('%Y%m%d %H-%M-%S.%f')[:-3]), save_path='./outputs/', verbose=1)
             frame = face_detector.draw_faces(frame, faces, fontScale=0.5, lineColor=(0,255,255))
             # show cap frame with fps

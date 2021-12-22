@@ -19,7 +19,7 @@ class FaceDector(object):
         if self.backend == 'opencv':
             face_dector = cv2.CascadeClassifier(self.opencv_xml_path)
         elif self.backend == 'mtcnn':
-            face_dector = MTCNN()
+            face_dector = MTCNN(weights_file='weights/mtcnn_weights.npy')
         return face_dector
 
     def __encode_detection(self, detections):
